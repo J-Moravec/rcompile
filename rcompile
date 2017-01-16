@@ -1,0 +1,43 @@
+#!/usr/bin/Rscript
+library("knitr")
+library("tools")
+
+try_system2 = function(command, args){
+    error = system2(command=command, args=args)
+    if(error != 0){
+        error_text = paste0(
+            "Encountered error during execution. Interrupting.\n",
+            "Error code: ", error)
+        stop(error_text)
+        }
+    }
+
+compile = function(basename){
+    name = paste0(basename, ".tex")
+    auxname = paste0(basename, ".aux")
+
+    try_system2("pdflatex", args=name)
+    system2("bibtex",args=auxname) # errors from this are OK
+    try_system2("pdflatex",args=name)
+    try_system2("pdflatex",args=name)
+    }
+
+main = function(args){
+    message("Compilling file:", args)
+
+    ext = file_ext(args[1])
+    basename = file_path_sans_ext(args[1])
+    if(tolower(ext) == "rtex"){    
+        knit(args[1])
+        compile(basename)
+        } else if(tolower(ext) == "tex"){
+        compile(basename)
+        } else {
+        stop("Unknown extension: ", ext)
+        }
+    }
+
+if(!interactive()){
+    args = commandArgs(TRUE)
+    main(args)
+    }
