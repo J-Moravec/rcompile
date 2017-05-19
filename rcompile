@@ -3,6 +3,8 @@ library("knitr")
 library("tools")
 library("argparser", quiet=TRUE)
 
+pdflatex_args = "-shell-escape -interaction=nonstopmode -file-line-error"
+
 try_system2 = function(command, args, con){
     error = system2(command=command, args=args, stderr=con, stdout=con)
     if(error != 0){
@@ -17,12 +19,12 @@ compile = function(basename, auxfiles, con, out){
 
     name = paste0(basename, ".tex")
 
-    try_system2("pdflatex", args=name, out)
+    try_system2("pdflatex", args=paste(pdflatex_args, name), out)
     for(auxname in auxfiles){
         system2("bibtex", args=auxname, stderr=con, stdout=con) # warnings from this are OK
         }
-    try_system2("pdflatex", args=name, out)
-    try_system2("pdflatex", args=name, out)
+    try_system2("pdflatex", args=paste(pdflatex_args, name), out)
+    try_system2("pdflatex", args=paste(pdflatex_args, name), out)
     }
 
 
